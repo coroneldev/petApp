@@ -1,2 +1,4 @@
-/* For information on how to create your own theme, please see:
-http://ionicframework.com/docs/theming/ */
+.custom-toolbar {
+  --background: #257E55;
+  --color: white; /* texto en blanco para contraste */
+}
