@@ -1,12 +1,13 @@
 <template>
   <ion-page>
+
     <ion-header>
       <ion-toolbar class="custom-toolbar">
         <ion-title>Tu Mascota APP</ion-title>
       </ion-toolbar>
     </ion-header>
 
-    <ion-content class="ion-padding">
+    <ion-content :fullscreen="true" class="ion-padding">
       <div class="contenedor-centro">
         <ion-card class="form-card">
           <ion-card-header>

@@ -1,4 +1,6 @@
 .custom-toolbar {
   --background: #257E55;
-  --color: white; /* texto en blanco para contraste */
+  --color: white;
+  /* texto en blanco para contraste */
+  padding-top: env(safe-area-inset-top);
 }
