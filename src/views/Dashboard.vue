@@ -11,14 +11,21 @@
       <!-- Información básica -->
       <ion-card>
         <ion-card-header>
-          <ion-card-title>Nombre: Rocky</ion-card-title>
-          <ion-card-subtitle>Edad: 2 años</ion-card-subtitle>
+          <!--<ion-card-title>Nombre: Rocky</ion-card-title>-->
+          <ion-card-title>Nombre: {{ mascota?.nombre || 'Cargando...' }}</ion-card-title>
+          <ion-card-subtitle>Edad: {{ mascota?.edad || 'Cargando...' }} años</ion-card-subtitle>
         </ion-card-header>
         <ion-card-content>
-          <p><strong>Raza:</strong> Labrador</p>
-          <p><strong>Sexo:</strong> Macho</p>
-          <p><strong>Color:</strong> Dorado</p>
+          <p><strong>Raza:</strong> {{ mascota?.raza || 'Cargando...' }}</p>
+          <p><strong>Sexo:</strong> {{ mascota?.sexo || 'Cargando...' }}</p>
+          <p><strong>Especie:</strong> {{ mascota?.especie || 'Cargando...' }}</p>
           <ion-img class="ion-margin-top" :src="imageUrl" alt="Imagen de mascota" />
+
+          <!---<ion-img class="ion-margin-top" :src="`http://localhost/petWeb/public/imagenes/${mascota?.foto}`"
+            alt="Imagen de mascota" />-->
+
+          <!--<img :src="`http://localhost/petWeb/public/${mascota.foto}`" alt="Foto de la mascota">-->
+
         </ion-card-content>
       </ion-card>
 
@@ -47,7 +54,7 @@
             </ion-row>
 
             <ion-row v-for="(vacuna, index) in vacunas" :key="index" class="ion-text-center">
-              <ion-col>{{ vacuna.nombre }}</ion-col>
+              <ion-col>{{ mascota?.detalles || 'Cargando...' }}</ion-col>
               <ion-col>{{ vacuna.fecha }}</ion-col>
             </ion-row>
           </ion-grid>
@@ -71,6 +78,7 @@ import { onMounted, ref } from 'vue'  // Importar onMounted y ref
 const mascota = ref(null);  // Definir la variable reactiva 'mascota'
 
 import MascotaService from '@/services/MascotaService' // Importamos el servicio MascotaService
+
 
 const store = useStore()  // Usamos el store de Vuex
 const codigo_masc = store.getters.getCodigo  // Accedemos al código guardado en Vuex

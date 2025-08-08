@@ -82,7 +82,6 @@ const verificarCodigo = async () => {
   }
 
 };
-
 </script>
 
 <style scoped>
@@ -92,6 +91,26 @@ const verificarCodigo = async () => {
   justify-content: center;
   align-items: center;
   height: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+/* Watermark */
+.contenedor-centro::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200px;
+  height: 200px;
+  background-image: url('data:image/svg+xml;utf8,<svg fill="none" stroke="%232e7d32" stroke-width="2" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="20" y="10" width="24" height="44" rx="4" ry="4"/><path d="M20 18h-8v20"/><path d="M20 38h-8v12"/></svg>');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  opacity: 0.1;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: -1;
 }
 
 /* Tarjeta estilo formulario */
@@ -115,5 +134,17 @@ const verificarCodigo = async () => {
   text-align: center;
   color: #666;
   font-size: 0.95rem;
+}
+
+/* Para que el ion-label floating no se superponga con el texto al escribir */
+ion-input input {
+  padding-top: 1.2rem !important; /* Empuja el texto un poco hacia abajo */
+}
+
+/* Ajustar ion-label floating */
+ion-label[position="floating"] {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #2e7d32;
 }
 </style>
