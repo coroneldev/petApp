@@ -18,11 +18,7 @@
           <p><strong>Raza:</strong> Labrador</p>
           <p><strong>Sexo:</strong> Macho</p>
           <p><strong>Color:</strong> Dorado</p>
-          <ion-img
-            class="ion-margin-top"
-            :src="imageUrl"
-            alt="Imagen de mascota"
-          />
+          <ion-img class="ion-margin-top" :src="imageUrl" alt="Imagen de mascota" />
         </ion-card-content>
       </ion-card>
 
@@ -67,6 +63,23 @@
 </template>
 
 <script setup>
+
+import { useStore } from 'vuex' // Importar el store de Vuex
+import { onMounted, ref } from 'vue'  // Importar onMounted y ref
+
+
+//const mascota = ref(null);  // Definir la variable reactiva 'mascota'
+
+import MascotaService from '@/services/MascotaService' // Importamos el servicio MascotaService
+
+const store = useStore()  // Usamos el store de Vuex
+const codigo_masc = store.getters.getCodigo  // Accedemos al código guardado en Vuex
+// Imprimir el valor del código en la consola
+console.log('Código recuperado desde Vuex:', codigo_masc)
+
+const codigo_cop = codigo_masc
+console.log(codigo_cop)
+
 import {
   IonPage,
   IonHeader,
@@ -98,6 +111,13 @@ const vacunas = [
   { nombre: 'Triple', fecha: '2025-06-15' },
 ]
 
+
+// Usamos el código de Vuex para hacer la petición al servicio
+
+//const response = await MascotaService.getByCodigo(codigo_masc)
+//console.log('Información de la mascota:', response)
+
+
 // Responsable
 const responsable = {
   nombre: 'Juan Pérez',
@@ -121,6 +141,8 @@ function getImageBase64(url) {
     img.src = url
   })
 }
+
+
 
 // Generar PDF tipo carnet
 async function generarPdf() {

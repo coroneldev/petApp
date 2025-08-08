@@ -34,6 +34,8 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router' // Importar el router para navegar
+import { useStore } from 'vuex' // Importar el store de Vuex
+import MascotaService from '@/services/MascotaService' // Importamos el servicio MascotaService
 
 import {
   IonPage,
@@ -52,25 +54,35 @@ import {
   IonCardSubtitle
 } from '@ionic/vue'
 
-const codigo = ref('')
+const codigo = ref('')  // Variable reactiva para el código
 const router = useRouter()
+const store = useStore() // Accedemos al store de Vuex
 
-const verificarCodigo = () => {
+
+const verificarCodigo = async () => {
   if (!codigo.value.trim()) {
-    alert('Por favor ingresa un código válido.')
-    return
+    alert('Por favor ingresa un código válido.');
+    return;
   }
 
-  // 🚧 Simulación de validación de código
-  // En el futuro aquí se consultará una API para verificar el código
-  if (codigo.value === '1234ABC') {
-    // ✅ Código válido, navegar a la pantalla de información
-    router.push('/dashboard')
-  } else {
-    // ❌ Código inválido
-    alert('Código incorrecto. Intenta nuevamente.')
+  // Imprime el valor del código ingresado en la consola
+  console.log('Código ingresado por el usuario:', codigo.value);
+
+  try {
+    const mascota = await MascotaService.getByCodigo(codigo.value.trim()); // Pasa el valor ingresado
+      console.log("Mascota obtenida:", mascota); // Puedes ver los datos de la mascota aquí
+      
+      // Guardamos el código en Vuex
+      store.dispatch('updateCodigo', codigo.value.trim())
+
+      router.push('/dashboard'); 
+  } catch (error) {
+    console.error('Error al verificar el código:', error);
+    alert('Hubo un problema al verificar el código. Intenta más tarde.');
   }
-}
+
+};
+
 </script>
 
 <style scoped>
