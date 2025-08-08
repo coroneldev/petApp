@@ -68,7 +68,7 @@ import { useStore } from 'vuex' // Importar el store de Vuex
 import { onMounted, ref } from 'vue'  // Importar onMounted y ref
 
 
-//const mascota = ref(null);  // Definir la variable reactiva 'mascota'
+const mascota = ref(null);  // Definir la variable reactiva 'mascota'
 
 import MascotaService from '@/services/MascotaService' // Importamos el servicio MascotaService
 
@@ -76,6 +76,17 @@ const store = useStore()  // Usamos el store de Vuex
 const codigo_masc = store.getters.getCodigo  // Accedemos al código guardado en Vuex
 // Imprimir el valor del código en la consola
 console.log('Código recuperado desde Vuex:', codigo_masc)
+
+// Obtener datos de la mascota desde el backend al montar el componente
+onMounted(async () => {
+  try {
+    const response = await MascotaService.getByCodigo(codigo_masc)
+    console.log('Información de la mascota desde backend:', response)
+    mascota.value = response
+  } catch (error) {
+    console.error('Error al obtener información de la mascota:', error)
+  }
+})
 
 const codigo_cop = codigo_masc
 console.log(codigo_cop)
@@ -111,13 +122,6 @@ const vacunas = [
   { nombre: 'Triple', fecha: '2025-06-15' },
 ]
 
-
-// Usamos el código de Vuex para hacer la petición al servicio
-
-//const response = await MascotaService.getByCodigo(codigo_masc)
-//console.log('Información de la mascota:', response)
-
-
 // Responsable
 const responsable = {
   nombre: 'Juan Pérez',
@@ -141,8 +145,6 @@ function getImageBase64(url) {
     img.src = url
   })
 }
-
-
 
 // Generar PDF tipo carnet
 async function generarPdf() {
