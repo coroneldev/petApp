@@ -28,6 +28,21 @@
         </ion-card>
       </div>
     </ion-content>
+
+    <ion-footer>
+      <ion-toolbar style="background-color: #003366; padding: 10px;">
+        <div style="text-align: center;">
+          <div style="color: #888; font-size: 0.9rem;">
+            © 2025 Cris. Todos los derechos reservados.
+          </div>
+          <div style="color: #ffcc00; font-weight: bold; font-size: 1rem; margin-top: 4px;">
+            Escuela Militar de Ingeniería EMI
+          </div>
+        </div>
+      </ion-toolbar>
+    </ion-footer>
+
+
   </ion-page>
 </template>
 
@@ -70,12 +85,12 @@ const verificarCodigo = async () => {
 
   try {
     const mascota = await MascotaService.getByCodigo(codigo.value.trim()); // Pasa el valor ingresado
-      console.log("Mascota obtenida:", mascota); // Puedes ver los datos de la mascota aquí
-      
-      // Guardamos el código en Vuex
-      store.dispatch('updateCodigo', codigo.value.trim())
+    console.log("Mascota obtenida:", mascota); // Puedes ver los datos de la mascota aquí
 
-      router.push('/dashboard'); 
+    // Guardamos el código en Vuex
+    store.dispatch('updateCodigo', codigo.value.trim())
+
+    router.push('/dashboard');
   } catch (error) {
     console.error('Error al verificar el código:', error);
     alert('Hubo un problema al verificar el código. Intenta más tarde.');
@@ -101,13 +116,17 @@ const verificarCodigo = async () => {
   position: absolute;
   top: 15%;
   left: 50%;
-  width: 150px;       /* Ajusta tamaño */
-  height: 150px;      /* Ajusta tamaño */
-  background-image: url('https://cdn-icons-png.flaticon.com/512/616/616408.png'); /* Ejemplo imagen de mascota */
+  width: 150px;
+  /* Ajusta tamaño */
+  height: 150px;
+  /* Ajusta tamaño */
+  background-image: url('https://cdn-icons-png.flaticon.com/512/616/616408.png');
+  /* Ejemplo imagen de mascota */
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
-  opacity: 0.07; /* Baja opacidad para no molestar */
+  opacity: 0.07;
+  /* Baja opacidad para no molestar */
   transform: translate(-50%, -50%);
   pointer-events: none;
   z-index: -1;
@@ -138,7 +157,8 @@ const verificarCodigo = async () => {
 
 /* Ajustar ion-input para que texto no se solape con label flotante */
 ion-input {
-  --padding-top: 1.8rem;  /* Empuja el texto hacia abajo para no superponerse */
+  --padding-top: 1.8rem;
+  /* Empuja el texto hacia abajo para no superponerse */
   --padding-bottom: 0.5rem;
 }
 
@@ -147,6 +167,7 @@ ion-label[position="floating"] {
   font-weight: 600;
   font-size: 0.95rem;
   color: #2e7d32;
-  z-index: 2; /* Asegurar que esté por encima del input */
+  z-index: 2;
+  /* Asegurar que esté por encima del input */
 }
 </style>
