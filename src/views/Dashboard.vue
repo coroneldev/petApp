@@ -11,7 +11,6 @@
       <!-- Información básica -->
       <ion-card>
         <ion-card-header>
-          <!--<ion-card-title>Nombre: Rocky</ion-card-title>-->
           <ion-card-title>Nombre: {{ mascota?.nombre || 'Cargando...' }}</ion-card-title>
           <ion-card-subtitle>Edad: {{ mascota?.edad || 'Cargando...' }} años</ion-card-subtitle>
         </ion-card-header>
@@ -20,12 +19,6 @@
           <p><strong>Sexo:</strong> {{ mascota?.sexo || 'Cargando...' }}</p>
           <p><strong>Especie:</strong> {{ mascota?.especie || 'Cargando...' }}</p>
           <ion-img class="ion-margin-top" :src="imageUrl" alt="Imagen de mascota" />
-
-          <!---<ion-img class="ion-margin-top" :src="`http://localhost/petWeb/public/imagenes/${mascota?.foto}`"
-            alt="Imagen de mascota" />-->
-
-          <!--<img :src="`http://localhost/petWeb/public/${mascota.foto}`" alt="Foto de la mascota">-->
-
         </ion-card-content>
       </ion-card>
 
@@ -35,9 +28,9 @@
           <ion-card-title>Responsable</ion-card-title>
         </ion-card-header>
         <ion-card-content>
-          <p><strong>Nombre:</strong> {{ responsable.nombre }}</p>
-          <p><strong>Teléfono:</strong> {{ responsable.telefono }}</p>
-          <p><strong>Dirección:</strong> {{ responsable.direccion }}</p>
+          <p><strong>Nombre:</strong> {{ responsable?.nombre || 'Cargando...' }}</p>
+          <p><strong>Teléfono:</strong> {{ responsable?.telefono || 'Cargando...' }}</p>
+          <p><strong>Dirección:</strong> {{ responsable?.direccion || 'Cargando...' }}</p>
         </ion-card-content>
       </ion-card>
 
@@ -54,7 +47,7 @@
             </ion-row>
 
             <ion-row v-for="(vacuna, index) in vacunas" :key="index" class="ion-text-center">
-              <ion-col>{{ mascota?.detalles || 'Cargando...' }}</ion-col>
+              <ion-col>{{ vacuna.nombre }}</ion-col>
               <ion-col>{{ vacuna.fecha }}</ion-col>
             </ion-row>
           </ion-grid>
@@ -70,34 +63,11 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue'
+import { useStore } from 'vuex'
 
-import { useStore } from 'vuex' // Importar el store de Vuex
-import { onMounted, ref } from 'vue'  // Importar onMounted y ref
-
-
-const mascota = ref(null);  // Definir la variable reactiva 'mascota'
-
-import MascotaService from '@/services/MascotaService' // Importamos el servicio MascotaService
-
-
-const store = useStore()  // Usamos el store de Vuex
-const codigo_masc = store.getters.getCodigo  // Accedemos al código guardado en Vuex
-// Imprimir el valor del código en la consola
-console.log('Código recuperado desde Vuex:', codigo_masc)
-
-// Obtener datos de la mascota desde el backend al montar el componente
-onMounted(async () => {
-  try {
-    const response = await MascotaService.getByCodigo(codigo_masc)
-    console.log('Información de la mascota desde backend:', response)
-    mascota.value = response
-  } catch (error) {
-    console.error('Error al obtener información de la mascota:', error)
-  }
-})
-
-const codigo_cop = codigo_masc
-console.log(codigo_cop)
+import MascotaService from '@/services/MascotaService'
+import ClienteService from '@/services/ClienteService'
 
 import {
   IonPage,
@@ -120,24 +90,43 @@ import {
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
-// Imagen de mascota
+// Reactive variables
+const mascota = ref(null)
+const responsable = ref(null)
+
+// Obtener el código de mascota desde Vuex
+const store = useStore()
+const codigo_masc = store.getters.getCodigo
+console.log('Código recuperado desde Vuex:', codigo_masc)
+
+// Imagen por defecto
 const imageUrl = 'https://cdn-icons-png.flaticon.com/512/616/616408.png'
 
-// Vacunas
+// Vacunas ejemplo (puedes adaptar para cargar real)
 const vacunas = [
   { nombre: 'Antirrábica', fecha: '2025-04-10' },
   { nombre: 'Parvovirus', fecha: '2025-05-01' },
   { nombre: 'Triple', fecha: '2025-06-15' },
 ]
 
-// Responsable
-const responsable = {
-  nombre: 'Juan Pérez',
-  telefono: '+591 71234567',
-  direccion: 'Av. Siempre Viva 123'
-}
+// Al montar, obtener la mascota y el cliente responsable
+onMounted(async () => {
+  try {
+    const mascotaResp = await MascotaService.getByCodigo(codigo_masc)
+    console.log('Información de la mascota desde backend:', mascotaResp)
+    mascota.value = mascotaResp
 
-// Convertir imagen a base64
+    if (mascotaResp && mascotaResp.id_cliente) {
+      const clienteResp = await ClienteService.getByCodigo(mascotaResp.id_cliente)
+      console.log('Cliente responsable obtenido:', clienteResp)
+      responsable.value = clienteResp
+    }
+  } catch (error) {
+    console.error('Error al obtener datos:', error)
+  }
+})
+
+// Convertir imagen a base64 para el PDF
 function getImageBase64(url) {
   return new Promise((resolve) => {
     const img = new Image()
@@ -154,7 +143,7 @@ function getImageBase64(url) {
   })
 }
 
-// Generar PDF tipo carnet
+// Generar PDF tipo carnet con datos reales
 async function generarPdf() {
   const doc = new jsPDF()
   const imgData = await getImageBase64(imageUrl)
@@ -165,25 +154,25 @@ async function generarPdf() {
   // Imagen mascota
   doc.addImage(imgData, 'PNG', 15, 25, 40, 40)
 
-  // Información de la mascota
+  // Datos mascota (con fallback)
   doc.setFontSize(12)
   doc.text('Información de la Mascota:', 60, 30)
   doc.setFontSize(10)
-  doc.text('Nombre: Rocky', 60, 38)
-  doc.text('Edad: 2 años', 60, 44)
-  doc.text('Raza: Labrador', 60, 50)
-  doc.text('Sexo: Macho', 60, 56)
-  doc.text('Color: Dorado', 60, 62)
+  doc.text(`Nombre: ${mascota.value?.nombre || 'N/A'}`, 60, 38)
+  doc.text(`Edad: ${mascota.value?.edad || 'N/A'} años`, 60, 44)
+  doc.text(`Raza: ${mascota.value?.raza || 'N/A'}`, 60, 50)
+  doc.text(`Sexo: ${mascota.value?.sexo || 'N/A'}`, 60, 56)
+  doc.text(`Especie: ${mascota.value?.especie || 'N/A'}`, 60, 62)
 
-  // Responsable
+  // Datos responsable
   doc.setFontSize(12)
   doc.text('Responsable:', 15, 75)
   doc.setFontSize(10)
-  doc.text(`Nombre: ${responsable.nombre}`, 15, 82)
-  doc.text(`Teléfono: ${responsable.telefono}`, 15, 88)
-  doc.text(`Dirección: ${responsable.direccion}`, 15, 94)
+  doc.text(`Nombre: ${responsable.value?.nombre || 'N/A'}`, 15, 82)
+  doc.text(`Teléfono: ${responsable.value?.telefono || 'N/A'}`, 15, 88)
+  doc.text(`Dirección: ${responsable.value?.direccion || 'N/A'}`, 15, 94)
 
-  // Tabla de vacunas
+  // Tabla vacunas
   doc.setFontSize(12)
   doc.text('Historial de Vacunas:', 15, 110)
   autoTable(doc, {
@@ -191,7 +180,7 @@ async function generarPdf() {
     head: [['Vacuna', 'Fecha']],
     body: vacunas.map(v => [v.nombre, v.fecha]),
     styles: { halign: 'center' },
-    headStyles: { fillColor: [40, 167, 69] }, // Verde
+    headStyles: { fillColor: [40, 167, 69] },
   })
 
   doc.save('carnet_mascota.pdf')
