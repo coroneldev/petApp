@@ -58,6 +58,11 @@
       <ion-button expand="block" color="tertiary" @click="generarPdf">
         Generar Carnet de Vacunas
       </ion-button>
+
+      <!-- Botón para salir de la app -->
+      <ion-button expand="block" color="danger" @click="salir" class="ion-margin-top">
+        Salir de la App
+      </ion-button>
     </ion-content>
   </ion-page>
 </template>
@@ -65,9 +70,11 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useStore } from 'vuex'
+import { useRouter } from 'vue-router'
 
 import MascotaService from '@/services/MascotaService'
 import ClienteService from '@/services/ClienteService'
+import VacunaService from '@/services/VacunaService'
 
 import {
   IonPage,
@@ -98,6 +105,9 @@ const responsable = ref(null)
 const store = useStore()
 const codigo_masc = store.getters.getCodigo
 console.log('Código recuperado desde Vuex:', codigo_masc)
+
+// Router para navegación
+const router = useRouter()
 
 // Imagen por defecto
 const imageUrl = 'https://cdn-icons-png.flaticon.com/512/616/616408.png'
@@ -184,6 +194,11 @@ async function generarPdf() {
   })
 
   doc.save('carnet_mascota.pdf')
+}
+
+// Función para salir y volver a pantalla inicial
+function salir() {
+  router.push('/') // Cambia '/' si la ruta inicial es diferente
 }
 </script>
 
