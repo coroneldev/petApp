@@ -73,8 +73,6 @@ import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 
 import MascotaService from '@/services/MascotaService'
-import ClienteService from '@/services/ClienteService'
-import VacunaService from '@/services/VacunaService'
 
 import {
   IonPage,
@@ -101,70 +99,89 @@ import autoTable from 'jspdf-autotable'
 const mascota = ref(null)
 const responsable = ref(null)
 
-// Obtener el código de mascota desde Vuex
+// Router y store
 const store = useStore()
-const codigo_masc = store.getters.getCodigo
-console.log('Código recuperado desde Vuex:', codigo_masc)
-
-// Router para navegación
 const router = useRouter()
 
-// Imagen por defecto
-const imageUrl = 'https://cdn-icons-png.flaticon.com/512/616/616408.png'
+// Leer código de localStorage si existe
+let codigo_masc = store.getters.getCodigo
+if (!codigo_masc) {
+  codigo_masc = localStorage.getItem('codigo_masc') || ''
+  store.commit('setCodigo', codigo_masc)
+}
+console.log('Código recuperado:', codigo_masc)
 
-// Vacunas ejemplo (puedes adaptar para cargar real)
+// Imagen por defecto
+const defaultImage = 'https://cdn-icons-png.flaticon.com/512/616/616408.png'
+const imageUrl = ref(defaultImage)
+
+// Vacunas de ejemplo
 const vacunas = [
   { nombre: 'Antirrábica', fecha: '2025-04-10' },
   { nombre: 'Parvovirus', fecha: '2025-05-01' },
   { nombre: 'Triple', fecha: '2025-06-15' },
 ]
 
-// Al montar, obtener la mascota y el cliente responsable
+// Obtener datos al montar
 onMounted(async () => {
+  if (!codigo_masc) {
+    alert('No se encontró el código de la mascota. Por favor inicia sesión.')
+    router.push('/')
+    return
+  }
+
   try {
     const mascotaResp = await MascotaService.getByCodigo(codigo_masc)
-    console.log('Información de la mascota desde backend:', mascotaResp)
+    console.log('Información de la mascota:', mascotaResp)
     mascota.value = mascotaResp
 
-    if (mascotaResp && mascotaResp.id_cliente) {
-      const clienteResp = await ClienteService.getByCodigo(mascotaResp.id_cliente)
-      console.log('Cliente responsable obtenido:', clienteResp)
-      responsable.value = clienteResp
+    if (mascotaResp?.cliente) {
+      responsable.value = mascotaResp.cliente
     }
+
+    imageUrl.value = mascotaResp?.foto
+      ? `${import.meta.env.VITE_API_URL}/${mascotaResp.foto}`
+      : defaultImage
+
   } catch (error) {
     console.error('Error al obtener datos:', error)
+    alert('No se pudo cargar la información de la mascota.')
   }
 })
 
-// Convertir imagen a base64 para el PDF
-function getImageBase64(url) {
-  return new Promise((resolve) => {
-    const img = new Image()
-    img.crossOrigin = 'Anonymous'
-    img.onload = function () {
-      const canvas = document.createElement('canvas')
-      canvas.width = this.width
-      canvas.height = this.height
-      const ctx = canvas.getContext('2d')
-      ctx.drawImage(this, 0, 0)
-      resolve(canvas.toDataURL('image/png'))
-    }
-    img.src = url
-  })
+// Convertir imagen a base64
+async function getImageBase64(url) {
+  try {
+    return await new Promise((resolve) => {
+      const img = new Image()
+      img.crossOrigin = 'Anonymous'
+      img.onload = function () {
+        const canvas = document.createElement('canvas')
+        canvas.width = this.width
+        canvas.height = this.height
+        const ctx = canvas.getContext('2d')
+        ctx.drawImage(this, 0, 0)
+        resolve(canvas.toDataURL('image/png'))
+      }
+      img.onerror = () => resolve(null)
+      img.src = url
+    })
+  } catch (e) {
+    console.error('Error convert image to base64', e)
+    return null
+  }
 }
 
-// Generar PDF tipo carnet con datos reales
+// Generar PDF tipo carnet
 async function generarPdf() {
   const doc = new jsPDF()
-  const imgData = await getImageBase64(imageUrl)
+  const imgData = await getImageBase64(imageUrl.value)
 
   doc.setFontSize(18)
   doc.text('Carnet de Vacunación de Mascota', 55, 15)
 
-  // Imagen mascota
-  doc.addImage(imgData, 'PNG', 15, 25, 40, 40)
+  if (imgData) doc.addImage(imgData, 'PNG', 15, 25, 40, 40)
 
-  // Datos mascota (con fallback)
   doc.setFontSize(12)
   doc.text('Información de la Mascota:', 60, 30)
   doc.setFontSize(10)
@@ -174,7 +191,6 @@ async function generarPdf() {
   doc.text(`Sexo: ${mascota.value?.sexo || 'N/A'}`, 60, 56)
   doc.text(`Especie: ${mascota.value?.especie || 'N/A'}`, 60, 62)
 
-  // Datos responsable
   doc.setFontSize(12)
   doc.text('Responsable:', 15, 75)
   doc.setFontSize(10)
@@ -182,7 +198,6 @@ async function generarPdf() {
   doc.text(`Teléfono: ${responsable.value?.telefono || 'N/A'}`, 15, 88)
   doc.text(`Dirección: ${responsable.value?.direccion || 'N/A'}`, 15, 94)
 
-  // Tabla vacunas
   doc.setFontSize(12)
   doc.text('Historial de Vacunas:', 15, 110)
   autoTable(doc, {
@@ -196,9 +211,9 @@ async function generarPdf() {
   doc.save('carnet_mascota.pdf')
 }
 
-// Función para salir y volver a pantalla inicial
+// Salir de la app
 function salir() {
-  router.push('/') // Cambia '/' si la ruta inicial es diferente
+  router.push('/')
 }
 </script>
 
