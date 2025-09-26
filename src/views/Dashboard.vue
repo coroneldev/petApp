@@ -54,11 +54,9 @@
         </ion-card-content>
       </ion-card>
 
-      <!-- Botón para generar PDF tipo carnet -->
-      <ion-button expand="block" color="tertiary" @click="generarPdf">
+      <ion-button expand="block" color="tertiary" @click="abrirPdf">
         Generar Carnet de Vacunas
       </ion-button>
-
       <!-- Botón para salir de la app -->
       <ion-button expand="block" color="danger" @click="salir" class="ion-margin-top">
         Salir de la App
@@ -92,8 +90,6 @@ import {
   IonButton
 } from '@ionic/vue'
 
-import jsPDF from 'jspdf'
-import autoTable from 'jspdf-autotable'
 
 // Reactive variables
 const mascota = ref(null)
@@ -172,43 +168,28 @@ async function getImageBase64(url) {
   }
 }
 
-// Generar PDF tipo carnet
-async function generarPdf() {
-  const doc = new jsPDF()
-  const imgData = await getImageBase64(imageUrl.value)
 
-  doc.setFontSize(18)
-  doc.text('Carnet de Vacunación de Mascota', 55, 15)
 
-  if (imgData) doc.addImage(imgData, 'PNG', 15, 25, 40, 40)
+// Nueva función: abrir PDF generado por el backend (DomPDF)
+function abrirPdf() {
+  if (!mascota.value?.codigo) {
+    alert('No se encontró el código de la mascota')
+    return
+  }
 
-  doc.setFontSize(12)
-  doc.text('Información de la Mascota:', 60, 30)
-  doc.setFontSize(10)
-  doc.text(`Nombre: ${mascota.value?.nombre || 'N/A'}`, 60, 38)
-  doc.text(`Edad: ${mascota.value?.edad || 'N/A'} años`, 60, 44)
-  doc.text(`Raza: ${mascota.value?.raza || 'N/A'}`, 60, 50)
-  doc.text(`Sexo: ${mascota.value?.sexo || 'N/A'}`, 60, 56)
-  doc.text(`Especie: ${mascota.value?.especie || 'N/A'}`, 60, 62)
+  const base = import.meta.env.VITE_API_URL || ''
+  const url = `http://localhost:8000/api/mascota/codigo/${mascota.value.codigo}/pdf`
 
-  doc.setFontSize(12)
-  doc.text('Responsable:', 15, 75)
-  doc.setFontSize(10)
-  doc.text(`Nombre: ${responsable.value?.nombre || 'N/A'}`, 15, 82)
-  doc.text(`Teléfono: ${responsable.value?.telefono || 'N/A'}`, 15, 88)
-  doc.text(`Dirección: ${responsable.value?.direccion || 'N/A'}`, 15, 94)
+  // Abrir en nueva pestaña (opción estándar)
+  window.open(url, '_blank')
 
-  doc.setFontSize(12)
-  doc.text('Historial de Vacunas:', 15, 110)
-  autoTable(doc, {
-    startY: 115,
-    head: [['Vacuna', 'Fecha']],
-    body: vacunas.map(v => [v.nombre, v.fecha]),
-    styles: { halign: 'center' },
-    headStyles: { fillColor: [40, 167, 69] },
-  })
-
-  doc.save('carnet_mascota.pdf')
+  // Si prefieres forzar descarga en vez de abrir, descomenta este bloque:
+  // const link = document.createElement('a')
+  // link.href = url
+  // link.setAttribute('download', `Carnet_${mascota.value.codigo}.pdf`)
+  // document.body.appendChild(link)
+  // link.click()
+  // link.remove()
 }
 
 // Salir de la app
