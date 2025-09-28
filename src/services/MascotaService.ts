@@ -34,7 +34,7 @@ class MascotaService {
   // Método para obtener las vacunas de la mascota por código
   async getVacunasByCodigo(codigo: string): Promise<Vacuna[]> {
     try {
-      const res = await http.get<VacunasApiResponse>(`/mascota/codigo/${codigo}/vacunas`);
+      const res = await http.get<VacunasApiResponse>(`/mascotas/codigo/${codigo}/vacunas`);
       console.log("Vacunas obtenidas del API:", res.data);
 
       return res.data.data;

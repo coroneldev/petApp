@@ -7,7 +7,7 @@ interface VacunasControlApiResponse {
   data: Vacuna[]; // O VacunaControl[] si quieres diferenciar de la entidad Vacuna
 }
 
-class ControlVacunasService {
+class ControlService {
 
   // Obtener controles/vacunas de una mascota por código
   async getVacunasByCodigo(codigo: string): Promise<Vacuna[]> {
@@ -24,4 +24,4 @@ class ControlVacunasService {
 
 }
 
-export default new ControlVacunasService();
+export default new ControlService();

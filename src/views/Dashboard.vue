@@ -18,7 +18,9 @@
           <p><strong>Raza:</strong> {{ mascota?.raza || 'Cargando...' }}</p>
           <p><strong>Sexo:</strong> {{ mascota?.sexo || 'Cargando...' }}</p>
           <p><strong>Especie:</strong> {{ mascota?.especie || 'Cargando...' }}</p>
-          <ion-img class="ion-margin-top" :src="imageUrl" alt="Imagen de mascota" />
+          <!--<ion-img class="ion-margin-top" :src="imageUrl" alt="Imagen de mascota" />-->
+          <!--Reemplazar ion-img por img normal -->
+          <img :src="imageUrl" alt="Imagen de mascota" style="max-width: 150px; display: block; margin: 0 auto;" />
         </ion-card-content>
       </ion-card>
 
@@ -43,12 +45,20 @@
           <ion-grid>
             <ion-row class="ion-text-center" color="light">
               <ion-col><strong>Vacuna</strong></ion-col>
-              <ion-col><strong>Fecha</strong></ion-col>
+              <ion-col><strong>Fecha Aplicacion</strong></ion-col>
+              <ion-col><strong>Proxima Aplicacion</strong></ion-col>
+              <ion-col><strong>Veterinario</strong></ion-col>
+              <ion-col><strong>Observacion</strong></ion-col>
             </ion-row>
 
-            <ion-row v-for="(vacuna, index) in vacunas" :key="index" class="ion-text-center">
-              <ion-col>{{ vacuna.nombre }}</ion-col>
-              <ion-col>{{ vacuna.fecha }}</ion-col>
+            <ion-row v-for="(vacuna, index) in vacunas || []" :key="index" class="ion-text-center">
+
+              <ion-col>{{ vacuna.vacuna_nombre }}</ion-col>
+              <ion-col>{{ vacuna.fecha_aplicacion }}</ion-col>
+              <ion-col>{{ vacuna.proxima_aplicacion }}</ion-col>
+              <ion-col>{{ vacuna.usuario_nombre }}</ion-col>
+              <ion-col>{{ vacuna.observaciones }}</ion-col>
+
             </ion-row>
           </ion-grid>
         </ion-card-content>
@@ -69,6 +79,7 @@
 import { ref, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
+
 
 import MascotaService from '@/services/MascotaService'
 
@@ -94,6 +105,7 @@ import {
 // Reactive variables
 const mascota = ref(null)
 const responsable = ref(null)
+const vacunas = ref([])
 
 // Router y store
 const store = useStore()
@@ -111,12 +123,6 @@ console.log('Código recuperado:', codigo_masc)
 const defaultImage = 'https://cdn-icons-png.flaticon.com/512/616/616408.png'
 const imageUrl = ref(defaultImage)
 
-// Vacunas de ejemplo
-const vacunas = [
-  { nombre: 'Antirrábica', fecha: '2025-04-10' },
-  { nombre: 'Parvovirus', fecha: '2025-05-01' },
-  { nombre: 'Triple', fecha: '2025-06-15' },
-]
 
 // Obtener datos al montar
 onMounted(async () => {
@@ -135,9 +141,24 @@ onMounted(async () => {
       responsable.value = mascotaResp.cliente
     }
 
+
     imageUrl.value = mascotaResp?.foto
-      ? `${import.meta.env.VITE_API_URL}/${mascotaResp.foto}`
+      ? `http://localhost:8000/storage/${encodeURI(mascotaResp.foto)}`
       : defaultImage
+
+
+    console.log('URL de la imagen:', imageUrl.value)
+
+    console.log('API URL:', import.meta.env.VITE_API_URL)
+    console.log('URL completa de la imagen:', imageUrl.value)
+
+
+    // --- Aquí agregamos la llamada para ver las vacunas ---
+    const vacunasResp = await MascotaService.getVacunasByCodigo(codigo_masc)
+    console.log('Vacunas obtenidas del API:', vacunasResp)
+    // Si quieres, puedes guardarlas en tu reactive variable:
+    vacunas.value = vacunasResp || []
+
 
   } catch (error) {
     console.error('Error al obtener datos:', error)
@@ -168,8 +189,6 @@ async function getImageBase64(url) {
   }
 }
 
-
-
 // Nueva función: abrir PDF generado por el backend (DomPDF)
 function abrirPdf() {
   if (!mascota.value?.codigo) {
@@ -183,13 +202,6 @@ function abrirPdf() {
   // Abrir en nueva pestaña (opción estándar)
   window.open(url, '_blank')
 
-  // Si prefieres forzar descarga en vez de abrir, descomenta este bloque:
-  // const link = document.createElement('a')
-  // link.href = url
-  // link.setAttribute('download', `Carnet_${mascota.value.codigo}.pdf`)
-  // document.body.appendChild(link)
-  // link.click()
-  // link.remove()
 }
 
 // Salir de la app
