@@ -3,7 +3,7 @@
 
     <ion-header>
       <ion-toolbar class="custom-toolbar">
-        <ion-title>Tu Mascota APP</ion-title>
+        <ion-title>Tu Mascota APP 1</ion-title>
       </ion-toolbar>
     </ion-header>
 
@@ -91,7 +91,7 @@ const verificarCodigo = async () => {
     router.push('/dashboard');
   } catch (error) {
     console.error('Error al verificar el código:', error);
-    alert('Hubo un problema al verificar el código. Intenta más tarde.');
+    alert('Hubo un problema al verificar el código. Intenta más tarde . ');
   }
 };
 </script>

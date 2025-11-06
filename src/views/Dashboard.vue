@@ -142,9 +142,11 @@ onMounted(async () => {
     }
 
 
-    imageUrl.value = mascotaResp?.foto
+   /* imageUrl.value = mascotaResp?.foto
       ? `http://localhost:8000/storage/${encodeURI(mascotaResp.foto)}`
-      : defaultImage
+      : defaultImage*/
+
+      
 
 
     console.log('URL de la imagen:', imageUrl.value)
